@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style media="screen">
+      body {
+        background-color: #4D944D;
+        color: #003D00;
+      }
+
+      #header {
+        width: 100%;
+        height: 100px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #004700;
+      }
+
+      #data_entry {
+        width: 365px;
+        margin-top: 120px;
+        margin-left: 20px;
+        background-color: #FFFFF5;
+        padding-top: 0;
+        padding: 10px;
+        border-radius: 20px;
+      }
+
+      #results {
+        position:relative;
+        float:left;
+        left: 450px;
+        bottom: 325px;
+        width: 365px;
+        background-color: #FFFFF5;
+        border-radius: 20px;
+        padding: 20px;
+        display: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="header"></div>
+    <div id="data_entry">
+      <div class="starting_point">
+        <h3>Starting point:</h3>
+        <p><input type="text" id='start_LRstepsAway' style='width:15px' name="LRstepsAway" value=""> steps
+          <select id="start_inside_outside">
+            <option value="inside">inside</option>
+            <option value="outside">outside</option>
+        </select> the <input type="text" id='start_yard_line' style='width:15px' name="yard_line" value=""> yard line on
+        <select id="start_side">
+            <option value="side1">Side 1</option>
+            <option value="side2">Side 2</option>
+        </select>
+      </p>
+        <p><input type="text" id='start_FBstepsAway' style='width:15px' name="FBstepsAway" value=""> steps
+          <select id="start_inFront_Behind">
+            <option value="in_front">in front of</option>
+            <option value="behind">behind</option>
+        </select> the
+        <select id="start_FB_marker">
+          <option value="FH">front hash</option>
+          <option value="BH">back hash</option>
+          <option value="FSL">front side line</option>
+          <option value="BSL">back side line</option>
+        </select>
+      </p>
+      </div>
+
+      <div class="ending_point">
+        <h3>Ending point:</h3>
+        <p><input type="text" id='end_LRstepsAway' style='width:15px' name="LRstepsAway" value=""> steps
+          <select id="end_inside_outside">
+            <option value="inside">inside</option>
+            <option value="outside">outside</option>
+        </select> the <input type="text" id='end_yard_line' style='width:15px' name="yard_line" value=""> yard line  on
+        <select id="end_side">
+            <option value="side1">Side 1</option>
+            <option value="side2">Side 2</option>
+        </select>
+      </p>
+        <p><input type="text" id='end_FBstepsAway' style='width:15px' name="FBstepsAway" value=""> steps
+          <select id="end_inFront_Behind">
+            <option value="in_front">in front of</option>
+            <option value="behind">behind</option>
+        </select> the
+        <select id="end_FB_marker">
+            <option value="FH">front hash</option>
+            <option value="BH">back hash</option>
+            <option value="FSL">front side line</option>
+            <option value="BSL">back side line</option>
+        </select>
+      </p>
+      </div>
+      <div class="counts">
+        <h3>Counts: <input type="text" id="counts" style='width:15px' name="counts" value=""></h3>
+      </div>
+      <div class="button">
+        <input type="button" id="calc" name="name" value="Calculate Midsets">
+      </div>
+    </div>
+    <div id="results">
+
+    </div>
+    <script src="https://code.jquery.com/jquery-2.1.1.js"></script>
+    <script type="text/javascript">
+
+    var LRCoordinateToSteps = function(steps, insideOutside, yard_line, side) {
+      var LRcoordinateArray = [];
+      steps = Number(steps)
+      yard_line = Number(yard_line);
+
+      if (side === 'side2') {
+        yard_line = 100 - yard_line
+      }
+
+      var LRinSteps = yard_line * 1.6;
+      if (yard_line < 50) {
+        if (insideOutside === 'inside') {
+          LRinSteps += steps;
+        } else if (insideOutside === 'outside') {
+          LRinSteps -= steps;
+        }
+      } else if (yard_line > 50) {
+          if (insideOutside === 'inside') {
+            LRinSteps -= steps;
+          } else if (insideOutside === 'outside') {
+            LRinSteps += steps;
+          }
+      }
+      LRcoordinateArray.push(steps,insideOutside,yard_line);
+      console.log(LRcoordinateArray)
+      return LRinSteps
+    }
+
+    // var parseLRCoordinate = function(LRcoordinate) {
+    //   LRcoordinate = LRcoordinate.toLowerCase().split(' ');
+    //   var LRcoordinateArray = [];
+    //
+    //   if (LRcoordinate.length > 6) {
+    //     if (LRcoordinate[0] !== 'side') {
+    //       stepsAway = Number(LRcoordinate[1]);
+    //       insideOutside = LRcoordinate[3];
+    //       sideOfField = LRcoordinate[0];
+    //       if (sideOfField === 'right:') {
+    //         yardLine = 100 - Number(LRcoordinate[4])
+    //       } else {
+    //         yardLine = Number(LRcoordinate[4]);
+    //       }
+    //     } else {
+    //       stepsAway = Number(LRcoordinate[2]);
+    //       insideOutside = LRcoordinate[4];
+    //       sideOfField = LRcoordinate[1];
+    //       if (sideOfField === '2:') {
+    //         yardLine = 100 - Number(LRcoordinate[5])
+    //       } else {
+    //         yardLine = Number(LRcoordinate[5]);
+    //       }
+    //     }
+    //   } else if (LRcoordinate.length > 4) {
+    //     if (LRcoordinate[0] !== 'side') {
+    //       stepsAway = 0;
+    //       insideOutside = 0;
+    //       sideOfField = LRcoordinate[0];
+    //       if (sideOfField === 'right:') {
+    //         yardLine = 100 - Number(LRcoordinate[2])
+    //       } else {
+    //         yardLine = Number(LRcoordinate[2]);
+    //       }
+    //     } else {
+    //       stepsAway = 0;
+    //       insideOutside = 0;
+    //       sideOfField = LRcoordinate[1];
+    //       if (sideOfField === '2:') {
+    //         yardLine = 100 - Number(LRcoordinate[3])
+    //       } else {
+    //         yardLine = Number(LRcoordinate[3]);
+    //       }
+    //     }
+    //   } else {
+    //     stepsAway = 0;
+    //     insideOutside = 0;
+    //     yardLine = 50;
+    //   }
+    //
+    //   var LRinSteps = yardLine * 1.6;
+    //   if (yardLine < 50) {
+    //     if (insideOutside === 'inside') {
+    //       LRinSteps += stepsAway;
+    //     } else if (insideOutside === 'outside') {
+    //       LRinSteps -= stepsAway;
+    //     }
+    //   } else if (yardLine > 50) {
+    //       if (insideOutside === 'inside') {
+    //         LRinSteps -= stepsAway;
+    //       } else if (insideOutside === 'outside') {
+    //         LRinSteps += stepsAway;
+    //       }
+    //   }
+    //   LRcoordinateArray.push(stepsAway,insideOutside,yardLine);
+    //   console.log(LRcoordinateArray)
+    //   return LRinSteps
+    // }
+
+    var FBCoordinateToSteps = function(inFrontBehind, fbMarker, steps) {
+      var FBinSteps;
+
+      if (steps === '' || steps === 0) {
+        if (fbMarker === 'FSL') {
+          FBinSteps = 0;
+        } else if (fbMarker === 'BSL') {
+          FBinSteps = 84;
+        } else if (fbMarker === 'FH') {
+          FBinSteps = 32;
+        } else if (fbMarker === 'BH') {
+          FBinSteps = 52;
+        }
+      } else {
+        steps = Number(steps);
+        if (fbMarker === 'FSL') {
+          if (inFrontBehind === 'in_front') {
+            FBinSteps = -steps;
+          } else if (inFrontBehind === 'behind') {
+            FBinSteps = steps;
+          }
+        } else if (fbMarker === 'BSL') {
+          if (inFrontBehind === 'in_front') {
+            FBinSteps = 84 - steps;
+          } else if (inFrontBehind === 'behind') {
+            FBinSteps = 84 + steps;
+          }
+        } else if (fbMarker === 'FH') {
+          if (inFrontBehind === 'in_front') {
+            FBinSteps = 32 - steps;
+          } else if (inFrontBehind === 'behind') {
+            FBinSteps = 32 + steps;
+          }
+        } else if (fbMarker === 'BH') {
+          if (inFrontBehind === 'in_front') {
+            FBinSteps = 52 - steps;
+          } else if (inFrontBehind === 'behind') {
+            FBinSteps = 52 + steps;
+          }
+        }
+      }
+      return FBinSteps;
+    }
+
+  //   var parseFBCoordinate = function(FBcoordinate) {
+  //     FBcoordinate = FBcoordinate.toLowerCase().split(' ');
+  //     console.log(FBcoordinate);
+  //     var FBinSteps;
+  //
+  //     if (FBcoordinate[0] === 'on') {
+  //       if (FBcoordinate[2] === 'side' && FBcoordinate[1] === 'front') {
+  //         FBinSteps = 0;
+  //       } else if (FBcoordinate[2] === 'side' && FBcoordinate[1] === 'back') {
+  //         FBinSteps = 84;
+  //       } else if (FBcoordinate[2] === 'hash' && FBcoordinate[1] === 'front') {
+  //         FBinSteps = 32;
+  //       } else if (FBcoordinate[2] === 'hash' && FBcoordinate[1] === 'back') {
+  //         FBinSteps = 52;
+  //       }
+  //     } else {
+  //       if (FBcoordinate[2] === 'behind' && FBcoordinate[4] === 'side') {
+  //         if (FBcoordinate[3] === 'front') {
+  //           FBinSteps = Number(FBcoordinate[0]);
+  //         } else if (FBcoordinate[3] === 'back') {
+  //           FBinSteps = 84 + Number(FBcoordinate[0]);
+  //         }
+  //       } else if (FBcoordinate[2] === 'behind' && FBcoordinate[4] === 'hash') {
+  //         if (FBcoordinate[3] === 'front') {
+  //           FBinSteps = 32 + Number(FBcoordinate[0]);
+  //         } else if (FBcoordinate[3] === 'back') {
+  //           FBinSteps = 52 + Number(FBcoordinate[0]);
+  //         }
+  //       } else if (FBcoordinate[3] === 'frnt' && FBcoordinate[6] === 'side') {
+  //         if (FBcoordinate[5] === 'front') {
+  //           FBinSteps = 0 - Number(FBcoordinate[0]);
+  //         } else if (FBcoordinate[5] === 'back') {
+  //           FBinSteps = 84 - Number(FBcoordinate[0]);
+  //         }
+  //       } else if (FBcoordinate[3] === 'frnt' && FBcoordinate[6] === 'hash') {
+  //         if (FBcoordinate[5] === 'front') {
+  //           FBinSteps = 32 - Number(FBcoordinate[0]);
+  //         } else if (FBcoordinate[5] === 'back') {
+  //           FBinSteps = 52 - Number(FBcoordinate[0]);
+  //         }
+  //     }
+  //   }
+  //   return FBinSteps;
+  // }
+
+  var calculateWrittenCoord = function(LRcoordInSteps, FBcoordInSteps) {
+    var yardLine = Math.floor((LRcoordInSteps * 5)/ 8);
+    yardLine = Math.floor(yardLine / 5) * 5
+    var stepsLeft = LRcoordInSteps % 8;
+    var LRreturn = "";
+    var FBreturn = "";
+
+    if (yardLine >= 50) {
+      if (stepsLeft > 4) {
+        yardLine = yardLine + 5;
+        yardLine = 100 - yardLine;
+        stepsLeft = 8 - stepsLeft;
+        LRreturn += 'Side 2: ' + stepsLeft + ' stp' + (stepsLeft === 1 ? '' : 's') + ' inside the ' + yardLine + ' yd ln';
+      } else if (stepsLeft > 0) {
+        LRreturn += 'Side 2: ' + stepsLeft + ' stp' + (stepsLeft === 1 ? '' : 's') + ' outside the ' + yardLine + ' yd ln';
+      } else {
+        LRreturn += 'Side 2: on the ' + yardLine + ' yd ln';
+      }
+    } else {
+      if (stepsLeft > 4) {
+        yardLine = yardLine + 5;
+        stepsLeft = 8 - stepsLeft;
+        LRreturn += 'Side 1: ' + stepsLeft + ' stp' + (stepsLeft === 1 ? '' : 's') + ' outsie the ' + yardLine + ' yd ln';
+      } else if (stepsLeft > 0) {
+        LRreturn += 'Side 1: ' + stepsLeft + ' stp' + (stepsLeft === 1 ? '' : 's') + ' inside the ' + yardLine + ' yd ln';
+      } else {
+        LRreturn += 'Side 1: on the ' + yardLine + ' yd ln';
+      }
+    } if (FBcoordInSteps === 0) {
+      FBreturn += 'on Front side line'
+    } else if (FBcoordInSteps === 32) {
+      FBreturn += 'on Front hash (NCAA)'
+    } else if (FBcoordInSteps === 52) {
+      FBreturn += 'on Back hash (NCAA)'
+    } else if (FBcoordInSteps === 84) {
+      FBreturn += 'on Back side line'
+    } else if (FBcoordInSteps < 0) {
+      FBcoordInSteps = 0 - FBcoordInSteps;
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' in front of Front side line'
+    } else if (FBcoordInSteps <= 16) {
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' behind Front side line'
+    } else if (FBcoordInSteps < 32) {
+      FBcoordInSteps = 32 - FBcoordInSteps
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' in front of Front hash'
+    } else if (FBcoordInSteps <= 42) {
+      FBcoordInSteps -= 32
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' behind Front hash'
+    } else if (FBcoordInSteps < 52) {
+      FBcoordInSteps = 52 - FBcoordInSteps
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' in front of Back hash'
+    } else if (FBcoordInSteps <= 68) {
+      FBcoordInSteps -= 52
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' behind Back hash'
+    } else if (FBcoordInSteps < 84) {
+      FBcoordInSteps = 84 - FBcoordInSteps
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' in front of Back side line'
+    } else if (FBcoordInSteps > 84) {
+      FBcoordInSteps -= 84
+      FBreturn += FBcoordInSteps + ' stp' + (FBcoordInSteps === 1 ? '' : 's') + ' beind Back side line'
+    }
+    return LRreturn + "\n" + FBreturn
+  }
+
+  var calclateMidset = function (startingLR, startingFB, endingLR, endingFB, counts) {
+    // startingLR = parseLRCoordinate(startingLR);
+    // startingFB = parseFBCoordinate(startingFB);
+    // endingLR = parseLRCoordinate(endingLR);
+    // endingFB = parseFBCoordinate(endingFB);
+
+    var changeInLR = endingLR - startingLR;
+    var changeInFB = endingFB - startingFB;
+
+    var midSetChangeLR = changeInLR / 2;
+    var quarSetChangeLR = changeInLR / 4;
+    var midSetChangeFB = changeInFB / 2;
+    var quarSetChangeFB = changeInFB / 4;
+
+    var midSetLR = startingLR + midSetChangeLR;
+    var midSetFB = startingFB + midSetChangeFB;
+    var quarSetLR1 = startingLR + quarSetChangeLR;
+    var quarSetFB1 = startingFB + quarSetChangeFB;
+    var quarSetLR2 = startingLR + (quarSetChangeLR * 3);
+    var quarSetFB2 = startingFB + (quarSetChangeFB * 3);
+
+    $('#results').empty()
+    $('#results').append($('<p>').html('<h4>On count ' + (counts / 4) + ':</h4>' + calculateWrittenCoord(quarSetLR1,quarSetFB1)));
+    $('#results').append($('<p>').html('<h4>On count ' + (counts / 2) + ':</h4>' + calculateWrittenCoord(midSetLR,midSetFB)));
+    $('#results').append($('<p>').html('<h4>On count ' + (counts * 3 / 4) + ':</h4>' + calculateWrittenCoord(quarSetLR2,quarSetFB2)));
+    $('#results').show()
+
+  }
+
+  $('#calc').on('click', function(){
+    var startingLR = LRCoordinateToSteps($('#start_LRstepsAway').val(), $('#start_inside_outside').val(),$('#start_yard_line').val(),$('#start_side').val());
+    var endingLR = LRCoordinateToSteps($('#end_LRstepsAway').val(), $('#end_inside_outside').val(),$('#end_yard_line').val(),$('#end_side').val());
+    var startingFB = FBCoordinateToSteps($('#start_inFront_Behind').val(), $('#start_FB_marker').val(), $('#start_FBstepsAway').val());
+    var endingFB = FBCoordinateToSteps($('#end_inFront_Behind').val(), $('#end_FB_marker').val(), $('#end_FBstepsAway').val());
+
+    calclateMidset(startingLR, startingFB, endingLR, endingFB,$('#counts').val())
+
+  })
+
+    </script>
+  </body>
+</html>
